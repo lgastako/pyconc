@@ -1,0 +1,2 @@
+This is just my playground for implementing conc lists (as described in this
+post: http://dustin.github.com/2010/03/04/erlang-conc.html) in Python.
