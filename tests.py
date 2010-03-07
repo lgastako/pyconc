@@ -8,6 +8,8 @@ from pyconc import Singleton
 from pyconc import Concat
 from pyconc import identity
 
+from pyconc import SingleThreadedMultiplexor
+
 
 class ConcTests(unittest.TestCase):
 
@@ -20,6 +22,7 @@ class ConcTests(unittest.TestCase):
         self.two_by_two = Concat(self.double, self.double)
         self.one_234 = Concat(Concat(Singleton(1), Singleton(2)),
                               Concat(Singleton(3), Singleton(4)))
+        self.st_multiplexor = SingleThreadedMultiplexor()
 
     def test_identity(self):
         for thing in [None, 5, "foo", object(), Empty(), [1, 2, 3],
@@ -50,26 +53,37 @@ class ConcTests(unittest.TestCase):
         self.assertEquals([1, 2, 3, 4], self.one_234.to_list())
 
     def test_singlethreaded_mapreduce_empty_no_initial_value(self):
-        f = lambda: self.empty.map_reduce(None, operator.__add__)
+        f = lambda: self.st_multiplexor.map_reduce(self.empty,
+                                                   None, operator.__add__)
         self.assertRaises(TypeError, f)
 
     def test_singlethreaded_mapreduce_empty_with_initial_value(self):
-        self.assertEquals(10, self.empty.map_reduce(None, operator.__add__,
-                                                    initial=10))
+        self.assertEquals(10, self.st_multiplexor.map_reduce(self.empty,
+                                                             None,
+                                                             operator.__add__,
+                                                             initial=10))
 
     def test_singlethreaded_mapreduce_singleton__no_initial_value(self):
-        self.assertEquals(42, self.single.map_reduce(None, operator.__add__))
+        self.assertEquals(42, self.st_multiplexor.map_reduce(self.single,
+                                                             None,
+                                                             operator.__add__))
 
     def test_singlethreaded_mapreduce_singleton_with_initial_value(self):
-        self.assertEquals(52, self.single.map_reduce(None, operator.__add__,
-                                                     initial=10))
+        self.assertEquals(52, self.st_multiplexor.map_reduce(self.single,
+                                                             None,
+                                                             operator.__add__,
+                                                             initial=10))
 
     def test_singlethreaded_mapreduce_concat_no_initial_value(self):
-        self.assertEquals(10, self.one_234.map_reduce(None, operator.__add__))
+        self.assertEquals(10, self.st_multiplexor.map_reduce(self.one_234,
+                                                             None,
+                                                             operator.__add__))
 
     def test_singlethreaded_mapreduce_concat_with_initial_value(self):
-        self.assertEquals(20, self.one_234.map_reduce(None, operator.__add__,
-                                                      initial=10))
+        self.assertEquals(20, self.st_multiplexor.map_reduce(self.one_234,
+                                                             None,
+                                                             operator.__add__,
+                                                             initial=10))
 
 
 if __name__ == '__main__':
